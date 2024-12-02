@@ -1,0 +1,16 @@
+{%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+
+<form id="collection-sort" class="main-collection__sort">
+  <select name="sort_by" class="select__select">
+    {%- for option in collection.sort_options -%}
+      <option
+        value="{{- option.value | escape -}}"
+        {% if option.value == sort_by %}
+          selected="selected"
+        {% endif %}
+      >
+        {{- option.name | escape -}}
+      </option>
+    {%- endfor -%}
+  </select>
+</form>

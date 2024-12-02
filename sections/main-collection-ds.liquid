@@ -4,7 +4,11 @@
   <script src="{{ 'collection-filters-ds.js' | asset_url }}" defer="defer"></script>
 
   <div class="main-collection__wrapper">
+    {%- render 'collection-sort-ds' -%}
+
     <div class="main-collection__container">
+      {%- render 'collection-filters-ds' -%}
+
       <div class="main-collection__products js-products-container" data-section-id="{{- section.id -}}">
         {%- paginate collection.products by s.products_per_page -%}
           <div class="main-collection__products-grid grid grid--{{- s.columns_desktop -}}-col-desktop grid--{{- s.columns_mobile -}}-col-tablet-down">

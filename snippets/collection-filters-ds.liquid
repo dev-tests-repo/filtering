@@ -1,0 +1,118 @@
+{%- assign sort_by = collection.sort_by | default: collection.default_sort_by -%}
+
+<div class="main-collection__filters-wrapper">
+  <div class="main-collection__filters-active main-collection__filters-group js-active-filters-container">
+    <p class="main-collection__filters-active-heading">
+      <span>{{- 'products.facets.filter_by_label' | t -}}</span>
+
+      <a href="{{- collection.url -}}" class="main-collection__filters-active-clear underlined-link js-remove-filter">
+        {{- 'products.facets.clear_all' | t -}}
+      </a>
+    </p>
+
+    {%- for filter in collection.filters -%}
+      {%- for value in filter.active_values -%}
+        <a href="{{- value.url_to_remove -}}" class="main-collection__filters-active-item js-remove-filter">
+          <span>{{- filter.label | escape }}: {{ value.label | escape -}}</span>
+
+          <span class="svg-wrapper">
+            {{- 'icon-close-small.svg' | inline_asset_content -}}
+          </span>
+        </a>
+      {%- endfor -%}
+
+      {%- if filter.type == 'price_range' -%}
+        {%- assign min = filter.min_value.value -%}
+        {%- assign max = filter.max_value.value -%}
+        {%- if min != nil or max != nil -%}
+          <a href="{{- filter.url_to_remove -}}" class="main-collection__filters-active-item js-remove-filter">
+            <span>{{ min | default: 0 | money }} - {{ max | default: filter.range_max | money }}</span>
+
+            <span class="svg-wrapper">
+              {{- 'icon-close-small.svg' | inline_asset_content -}}
+            </span>
+          </a>
+        {%- endif -%}
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+
+  <form id="collection-filters" class="main-collection__filters-list">
+    {%- for filter in collection.filters -%}
+      <div
+        class="main-collection__filters-list-item main-collection__filters-group js-filter-item"
+        id="{{- filter.param_name | escape -}}-{{- section.id -}}"
+      >
+        <p>{{- filter.label | append: ':' -}}</p>
+
+        {%- case filter.type -%}
+          {%- when 'boolean', 'list' -%}
+            {%- for value in filter.values -%}
+              {%- liquid
+                assign input_id = 'Filter-' | append: filter.param_name | escape | append: '-' | append: forloop.index
+
+                assign is_disabled = false
+                if value.count == 0 and value.active == false
+                  assign is_disabled = true
+                endif
+              -%}
+
+              <label for="{{- input_id -}}" class="{{- label_class -}}">
+                <input
+                  type="checkbox"
+                  name="{{- value.param_name -}}"
+                  value="{{- value.value -}}"
+                  id="{{- input_id -}}"
+                  {% if value.active %}
+                    checked
+                  {% endif %}
+                  {% if is_disabled %}
+                    disabled
+                  {% endif %}
+                >
+
+                {{- value.label | append: ' (' | append: value.count | append: ')' -}}
+              </label>
+            {%- endfor -%}
+
+          {%- when 'price_range' -%}
+            <div class="field">
+              <input
+                class="field__input"
+                name="{{- filter.min_value.param_name -}}"
+                id="{{- filter.label | escape -}}-GTE"
+                {%- if filter.min_value.value -%}
+                  value="{{- filter.min_value.value | money_without_currency -}}"
+                {%- endif -%}
+                type="text"
+                inputmode="decimal"
+                placeholder="0"
+              >
+
+              <label class="field__label" for="{{- filter.label | escape -}}-GTE">
+                {{- 'products.facets.from' | t -}}
+              </label>
+            </div>
+
+            <div class="field">
+              <input
+                class="field__input"
+                name="{{- filter.max_value.param_name -}}"
+                id="{{- filter.label | escape -}}-LTE"
+                {%- if filter.max_value.value -%}
+                  value="{{- filter.max_value.value | money_without_currency -}}"
+                {%- endif -%}
+                type="text"
+                inputmode="decimal"
+                placeholder="{{- filter.range_max | money_without_currency -}}"
+              >
+
+              <label class="field__label" for="{{- filter.label | escape -}}-LTE">
+                {{- 'products.facets.to' | t -}}
+              </label>
+            </div>
+        {%- endcase -%}
+      </div>
+    {%- endfor -%}
+  </form>
+</div>
